@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install frontend
+      - name: Install dependencies
         working-directory: client
         run: npm install
 
@@ -24,23 +24,33 @@ jobs:
         working-directory: client
         run: npm run build
 
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-
       - name: Install Capacitor
         working-directory: client
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Create Capacitor config
+        working-directory: client
+        run: |
           npx cap init "IT Service Desk" "com.itservicedesk.app" --web-dir dist
-          npx cap add android
-          npx cap sync android
+
+      - name: Add Android
+        working-directory: client
+        run: npx cap add android
+
+      - name: Sync Android
+        working-directory: client
+        run: npx cap sync android
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
 
       - name: Build APK
         working-directory: client/android
-        run: ./gradlew assembleDebug
+        run: chmod +x gradlew && ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
